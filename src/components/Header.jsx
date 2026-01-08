@@ -3,25 +3,22 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePWAInstall } from '@/hooks/usePWAInstall';
 
 export default function Header() {
   const [visible, setVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const { isInstallable, install } = usePWAInstall();
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
-      // Si estamos arriba del todo, siempre mostrar
       if (currentScrollY < 10) {
         setVisible(true);
-      }
-      // Scroll hacia abajo = ocultar
-      else if (currentScrollY > lastScrollY && currentScrollY > 50) {
+      } else if (currentScrollY > lastScrollY && currentScrollY > 50) {
         setVisible(false);
-      }
-      // Scroll hacia arriba = mostrar
-      else if (currentScrollY < lastScrollY) {
+      } else if (currentScrollY < lastScrollY) {
         setVisible(true);
       }
 
@@ -56,7 +53,19 @@ export default function Header() {
             </span>
           </Link>
 
-          <nav>
+          <nav className="flex items-center gap-4">
+            {isInstallable && (
+              <button
+                onClick={install}
+                className="text-[#a0a0a0] hover:text-white transition-colors duration-200"
+                aria-label="Install App"
+                title="Install App"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+              </button>
+            )}
             <a
               href="https://opensea.io/collection/archive-of-meme-arch"
               target="_blank"
