@@ -17,6 +17,12 @@ export const metadata = {
   description: "The definitive digital museum of memes. A new iconic meme preserved as NFT every day. Own a piece of internet history.",
   keywords: ["memes", "NFT", "digital art", "internet culture", "collectibles", "OpenSea"],
   authors: [{ name: "Archive of Meme" }],
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Archive of Meme",
+  },
   openGraph: {
     title: "Archive of Meme - The Digital Museum of Memes",
     description: "The definitive digital museum of memes. A new iconic meme preserved as NFT every day.",
