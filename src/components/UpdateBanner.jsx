@@ -8,10 +8,24 @@ export default function UpdateBanner() {
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
 
+    // Check if running as installed PWA (standalone mode)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true;
+
+    const handleUpdate = () => {
+      if (isStandalone) {
+        // PWA: Show banner, let user decide when to update
+        setShowBanner(true);
+      } else {
+        // Browser: Auto-refresh silently
+        window.location.reload();
+      }
+    };
+
     // Listen for messages from Service Worker
     const handleMessage = (event) => {
       if (event.data?.type === 'SW_UPDATED') {
-        setShowBanner(true);
+        handleUpdate();
       }
     };
 
@@ -20,7 +34,7 @@ export default function UpdateBanner() {
     // Also check for waiting service worker on load
     navigator.serviceWorker.ready.then((registration) => {
       if (registration.waiting) {
-        setShowBanner(true);
+        handleUpdate();
       }
 
       // Listen for new service worker installing
@@ -28,7 +42,7 @@ export default function UpdateBanner() {
         const newWorker = registration.installing;
         newWorker?.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            setShowBanner(true);
+            handleUpdate();
           }
         });
       });
