@@ -11,7 +11,7 @@ export default function Header() {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
-  const { isInstallable, install } = usePWAInstall();
+  const { isInstallable, isIOS, install } = usePWAInstall();
 
   useEffect(() => {
     // Check if desktop (768px+)
@@ -109,6 +109,7 @@ export default function Header() {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         onInstall={handleInstallConfirm}
+        isIOS={isIOS}
       />
     </>
   );
