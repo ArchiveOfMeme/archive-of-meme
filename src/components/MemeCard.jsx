@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 
 export default function MemeCard({ meme }) {
   const [expanded, setExpanded] = useState(false);
@@ -23,13 +22,11 @@ export default function MemeCard({ meme }) {
       </div>
 
       {/* Image */}
-      <div className="relative w-full aspect-square bg-[#0a0a0a]">
-        <Image
+      <div className="w-full bg-[#0a0a0a] flex justify-center">
+        <img
           src={meme.image}
           alt={meme.name}
-          fill
-          className="object-contain"
-          unoptimized
+          className="w-full h-auto max-h-[70vh] object-contain"
         />
       </div>
 
