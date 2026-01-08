@@ -31,6 +31,13 @@ body {
   min-height: 100vh;
 }
 
+/* Slightly lighter background on desktop */
+@media (min-width: 768px) {
+  :root {
+    --background: #121212;
+  }
+}
+
 ::selection {
   background: var(--accent);
   color: var(--background);
