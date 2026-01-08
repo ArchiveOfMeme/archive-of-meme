@@ -10,9 +10,24 @@ export default function Header() {
   const [visible, setVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [showModal, setShowModal] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const { isInstallable, install } = usePWAInstall();
 
   useEffect(() => {
+    // Check if desktop (768px+)
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 768);
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
+
+  useEffect(() => {
+    // Only hide on scroll for desktop
+    if (!isDesktop) {
+      setVisible(true);
+      return;
+    }
+
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
@@ -29,7 +44,7 @@ export default function Header() {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, [lastScrollY, isDesktop]);
 
   const handleInstallClick = () => {
     setShowModal(true);
