@@ -30,13 +30,23 @@ export async function GET() {
 
     const data = await response.json();
 
-    const memes = data.nfts?.map((nft) => ({
-      id: nft.identifier || nft.token_id || '0',
-      name: nft.name || 'Untitled',
-      image: nft.image_url || nft.display_image_url || '/images/placeholder.png',
-      description: nft.description || '',
-      opensea_url: `https://opensea.io/assets/${CHAIN}/${nft.contract}/${nft.identifier}`,
-    })) || [];
+    const memes = data.nfts?.map((nft) => {
+      // Prefer original IPFS image, convert ipfs:// to HTTP gateway
+      let image = '/images/placeholder.png';
+      if (nft.original_image_url) {
+        image = nft.original_image_url.replace('ipfs://', 'https://ipfs.io/ipfs/');
+      } else if (nft.image_url) {
+        image = nft.image_url;
+      }
+
+      return {
+        id: nft.identifier || nft.token_id || '0',
+        name: nft.name || 'Untitled',
+        image,
+        description: nft.description || '',
+        opensea_url: `https://opensea.io/assets/${CHAIN}/${nft.contract}/${nft.identifier}`,
+      };
+    }) || [];
 
     // Sort by ID descending (newest first)
     memes.sort((a, b) => Number(b.id) - Number(a.id));
