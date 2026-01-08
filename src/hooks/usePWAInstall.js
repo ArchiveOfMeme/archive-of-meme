@@ -9,6 +9,10 @@ export function usePWAInstall() {
   const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
+    // Detect mobile devices only
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      || (navigator.maxTouchPoints > 0 && window.innerWidth < 768);
+
     // Detect iOS
     const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     setIsIOS(iOS);
@@ -18,13 +22,18 @@ export function usePWAInstall() {
       || window.navigator.standalone === true;
     setIsStandalone(standalone);
 
+    // Only show install on mobile devices
+    if (!isMobile || standalone) {
+      return;
+    }
+
     // If iOS and not standalone, show install option
-    if (iOS && !standalone) {
+    if (iOS) {
       setIsInstallable(true);
       return;
     }
 
-    // For other browsers, listen for beforeinstallprompt
+    // For other mobile browsers, listen for beforeinstallprompt
     const handler = (e) => {
       e.preventDefault();
       setInstallPrompt(e);

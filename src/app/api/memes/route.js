@@ -1,6 +1,7 @@
 const COLLECTION_SLUG = 'archive-of-meme-arch';
 const CHAIN = 'base';
 const OPENSEA_API = 'https://api.opensea.io/api/v2';
+const PASS_TOKEN_ID = process.env.NEXT_PUBLIC_PASS_TOKEN_ID || '8';
 
 export async function GET() {
   const apiKey = process.env.OPENSEA_API_KEY;
@@ -30,23 +31,29 @@ export async function GET() {
 
     const data = await response.json();
 
-    const memes = data.nfts?.map((nft) => {
-      // Prefer original IPFS image, convert ipfs:// to HTTP gateway
-      let image = '/images/placeholder.png';
-      if (nft.original_image_url) {
-        image = nft.original_image_url.replace('ipfs://', 'https://ipfs.io/ipfs/');
-      } else if (nft.image_url) {
-        image = nft.image_url;
-      }
+    const memes = data.nfts
+      ?.filter((nft) => {
+        // Exclude the NFT Pass from the feed
+        const tokenId = nft.identifier || nft.token_id;
+        return tokenId !== PASS_TOKEN_ID;
+      })
+      .map((nft) => {
+        // Prefer original IPFS image, convert ipfs:// to HTTP gateway
+        let image = '/images/placeholder.png';
+        if (nft.original_image_url) {
+          image = nft.original_image_url.replace('ipfs://', 'https://ipfs.io/ipfs/');
+        } else if (nft.image_url) {
+          image = nft.image_url;
+        }
 
-      return {
-        id: nft.identifier || nft.token_id || '0',
-        name: nft.name || 'Untitled',
-        image,
-        description: nft.description || '',
-        opensea_url: `https://opensea.io/assets/${CHAIN}/${nft.contract}/${nft.identifier}`,
-      };
-    }) || [];
+        return {
+          id: nft.identifier || nft.token_id || '0',
+          name: nft.name || 'Untitled',
+          image,
+          description: nft.description || '',
+          opensea_url: `https://opensea.io/assets/${CHAIN}/${nft.contract}/${nft.identifier}`,
+        };
+      }) || [];
 
     // Sort by ID descending (newest first)
     memes.sort((a, b) => Number(b.id) - Number(a.id));

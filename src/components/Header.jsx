@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import InstallModal from './InstallModal';
 
@@ -62,7 +63,7 @@ export default function Header() {
           visible ? 'translate-y-0' : '-translate-y-full'
         }`}
       >
-        <div className="max-w-xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between h-14">
             <Link href="/" className="flex items-center gap-2">
               <Image
@@ -80,7 +81,29 @@ export default function Header() {
               </span>
             </Link>
 
-            <nav className="flex items-center gap-3">
+            <nav className="flex items-center gap-2">
+              <ConnectButton.Custom>
+                {({ account, chain, openConnectModal, openAccountModal, mounted }) => {
+                  const connected = mounted && account && chain;
+                  return (
+                    <button
+                      onClick={connected ? openAccountModal : openConnectModal}
+                      className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#a5b4fc] text-black hover:bg-[#8b9cf0] rounded-full transition-all duration-200"
+                    >
+                      {connected ? (
+                        <>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                          </svg>
+                          <span className="hidden sm:inline">{account.displayName}</span>
+                        </>
+                      ) : (
+                        'Connect'
+                      )}
+                    </button>
+                  );
+                }}
+              </ConnectButton.Custom>
               {isInstallable && (
                 <button
                   onClick={handleInstallClick}
