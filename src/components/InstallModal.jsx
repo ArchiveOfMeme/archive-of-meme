@@ -36,7 +36,7 @@ export default function InstallModal({ isOpen, onClose, onInstall, isIOS }) {
         {/* Description */}
         <p className="text-[#a0a0a0] text-sm text-center mb-6">
           {isIOS
-            ? "Add to your home screen in 3 easy steps:"
+            ? "Open in Safari and follow these steps:"
             : "Add to your home screen for quick access. No app store needed."
           }
         </p>
