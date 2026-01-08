@@ -21,6 +21,15 @@ export const metadata = {
   keywords: ["memes", "NFT", "digital art", "internet culture", "collectibles", "OpenSea"],
   authors: [{ name: "Archive of Meme" }],
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/icon-192x192.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
