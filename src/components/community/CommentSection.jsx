@@ -6,17 +6,14 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useHasPass } from '@/hooks/useHasPass';
 import Comment from './Comment';
 
-const PASS_TOKEN_ID = process.env.NEXT_PUBLIC_PASS_TOKEN_ID || '8';
-
 export default function CommentSection({ memeId }) {
   const { address, isConnected } = useAccount();
-  const { hasPass, loading: passLoading } = useHasPass();
+  const { hasPass } = useHasPass();
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [passImage, setPassImage] = useState('/images/logo/Logo.png');
 
   // Fetch comments
   const fetchComments = async () => {
@@ -33,24 +30,6 @@ export default function CommentSection({ memeId }) {
   useEffect(() => {
     fetchComments();
   }, [memeId]);
-
-  // Fetch Pass NFT image
-  useEffect(() => {
-    const fetchPassImage = async () => {
-      try {
-        const res = await fetch(`/api/memes/${PASS_TOKEN_ID}`);
-        const data = await res.json();
-        if (data.meme?.image) {
-          setPassImage(data.meme.image);
-        }
-      } catch (err) {
-        // Keep default image
-      }
-    };
-    if (isConnected && !hasPass) {
-      fetchPassImage();
-    }
-  }, [isConnected, hasPass]);
 
   // Submit new comment
   const handleSubmit = async (e) => {
@@ -158,16 +137,12 @@ export default function CommentSection({ memeId }) {
       ) : !hasPass ? (
         <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] rounded-2xl p-5 border border-[#2a2a2a]">
           <div className="flex gap-4 items-start">
-            {/* NFT Pass Image */}
+            {/* OG Pass Icon */}
             <div className="relative flex-shrink-0">
-              <div className="w-24 h-24 rounded-xl overflow-hidden bg-[#0a0a0a] ring-2 ring-[#a5b4fc]/30 shadow-lg shadow-[#a5b4fc]/10">
-                <img
-                  src={passImage}
-                  alt="Community Pass NFT"
-                  className="w-full h-full object-cover"
-                />
+              <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-gradient-to-br from-yellow-500/20 to-orange-500/20 ring-2 ring-yellow-500/30 shadow-lg shadow-yellow-500/10 flex items-center justify-center">
+                <span className="text-4xl">👑</span>
               </div>
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#a5b4fc] rounded-full flex items-center justify-center">
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center">
                 <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                 </svg>
@@ -176,24 +151,24 @@ export default function CommentSection({ memeId }) {
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-              <h4 className="text-white font-bold text-base mb-1">Community Pass</h4>
+              <h4 className="text-white font-bold text-base mb-1">OG Pass Required</h4>
               <p className="text-[#888] text-xs mb-3 leading-relaxed">
-                Unlock comments, votes and join the Archive of Meme community.
+                Only OG Pass holders can comment. Get yours to join the conversation and unlock exclusive benefits.
               </p>
 
               <div className="flex items-center gap-3">
                 <a
-                  href="https://opensea.io/assets/base/0xa11233cd58e76d1a149c86bac503742636c8f60c/8"
+                  href="https://opensea.io/collection/archive-of-meme-pass"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#a5b4fc] text-black text-sm font-bold rounded-full hover:bg-[#8b9cf0] transition-all hover:scale-105"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-sm font-bold rounded-full hover:opacity-90 transition-all hover:scale-105"
                 >
-                  <span>Get Pass</span>
+                  <span>Get OG Pass</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </a>
-                <span className="text-[#666] text-xs">0.0005 ETH</span>
+                <span className="text-[#666] text-xs">0.003 ETH</span>
               </div>
             </div>
           </div>

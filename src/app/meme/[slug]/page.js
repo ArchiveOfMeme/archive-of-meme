@@ -1,7 +1,9 @@
 import MemeDetail from '@/components/MemeDetail';
+import { getMemeIdFromSlug } from '@/utils/slug';
 
 export async function generateMetadata({ params }) {
-  const { id } = await params;
+  const { slug } = await params;
+  const id = getMemeIdFromSlug(slug);
 
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/memes/${id}`, {
@@ -30,7 +32,8 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function MemePage({ params }) {
-  const { id } = await params;
+  const { slug } = await params;
+  const memeId = getMemeIdFromSlug(slug);
 
-  return <MemeDetail memeId={id} />;
+  return <MemeDetail memeId={memeId} />;
 }

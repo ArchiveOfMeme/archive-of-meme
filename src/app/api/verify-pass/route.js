@@ -1,9 +1,13 @@
-// API para verificar si una wallet tiene el Community Pass (Token #8)
+// API para verificar si una wallet tiene el OG Pass
+// Usa el cache de mining_users (actualizado por Alchemy webhooks)
 
-const OPENSEA_API = 'https://api.opensea.io/api/v2';
-const CHAIN = 'base';
-const CONTRACT = process.env.NEXT_PUBLIC_PASS_CONTRACT;
-const TOKEN_ID = process.env.NEXT_PUBLIC_PASS_TOKEN_ID;
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+const PASS_COLLECTION_SLUG = 'archive-of-meme-pass';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -13,43 +17,33 @@ export async function GET(request) {
     return Response.json({ error: 'Wallet address required' }, { status: 400 });
   }
 
-  const apiKey = process.env.OPENSEA_API_KEY;
-  if (!apiKey) {
-    return Response.json({ error: 'API not configured' }, { status: 500 });
-  }
-
   try {
-    // Query OpenSea for NFTs owned by this wallet from our collection
-    const response = await fetch(
-      `${OPENSEA_API}/chain/${CHAIN}/account/${wallet.toLowerCase()}/nfts?collection=archive-of-meme-arch`,
-      {
-        headers: {
-          'accept': 'application/json',
-          'x-api-key': apiKey,
-        },
-      }
-    );
+    const walletLower = wallet.toLowerCase();
 
-    if (!response.ok) {
-      console.error('OpenSea API error:', response.status);
-      return Response.json({ hasPass: false, error: 'API error' }, { status: 200 });
+    // Leer del cache en mining_users (actualizado por Alchemy webhooks)
+    const { data: user, error } = await supabase
+      .from('mining_users')
+      .select('cached_has_pass')
+      .eq('wallet', walletLower)
+      .single();
+
+    if (error || !user) {
+      // Usuario no registrado - no tiene pass
+      return Response.json({
+        hasPass: false,
+        wallet: walletLower,
+        collection: PASS_COLLECTION_SLUG,
+      });
     }
 
-    const data = await response.json();
-
-    // Check if user owns Token #8 (Community Pass)
-    const hasPass = data.nfts?.some(
-      (nft) => nft.identifier === TOKEN_ID || nft.token_id === TOKEN_ID
-    ) || false;
-
     return Response.json({
-      hasPass,
-      wallet: wallet.toLowerCase(),
-      tokenId: TOKEN_ID
+      hasPass: user.cached_has_pass || false,
+      wallet: walletLower,
+      collection: PASS_COLLECTION_SLUG,
     });
 
   } catch (error) {
-    console.error('Error verifying pass:', error.message);
+    console.error('Error verifying OG Pass:', error.message);
     return Response.json({ hasPass: false, error: error.message }, { status: 200 });
   }
 }

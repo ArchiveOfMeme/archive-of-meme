@@ -1,59 +1,75 @@
-const COLLECTION_SLUG = 'archive-of-meme-arch';
+// API para obtener un meme específico por ID
+// Usa Alchemy NFT API (más rápido y confiable que OpenSea)
+
+const MEMES_CONTRACT = '0xa11233cd58e76d1a149c86bac503742636c8f60c';
 const CHAIN = 'base';
-const OPENSEA_API = 'https://api.opensea.io/api/v2';
 
 export async function GET(request, { params }) {
   const { id } = await params;
-  const apiKey = process.env.OPENSEA_API_KEY;
+  const alchemyKey = process.env.ALCHEMY_API_KEY;
 
-  if (!apiKey) {
-    return Response.json({ error: 'API not configured' }, { status: 500 });
+  if (!alchemyKey) {
+    return Response.json({ error: 'ALCHEMY_API_KEY not configured' }, { status: 500 });
   }
 
   try {
-    // Fetch all NFTs and find the one with matching ID
+    // Alchemy NFT API - getNFTMetadata (obtener un NFT específico)
     const response = await fetch(
-      `${OPENSEA_API}/collection/${COLLECTION_SLUG}/nfts?limit=50`,
+      `https://base-mainnet.g.alchemy.com/nft/v3/${alchemyKey}/getNFTMetadata?contractAddress=${MEMES_CONTRACT}&tokenId=${id}&refreshCache=false`,
       {
         headers: {
           'accept': 'application/json',
-          'x-api-key': apiKey,
         },
-        next: { revalidate: 60 },
+        next: { revalidate: 60 }, // Cache por 60 segundos
       }
     );
 
     if (!response.ok) {
-      return Response.json({ error: 'OpenSea API error' }, { status: response.status });
+      const errorText = await response.text();
+      console.error('Alchemy API error:', response.status, errorText);
+      return Response.json({ error: 'Alchemy API error' }, { status: response.status });
     }
 
-    const data = await response.json();
+    const nft = await response.json();
 
-    const nft = data.nfts?.find((n) => n.identifier === id || n.token_id === id);
-
-    if (!nft) {
+    if (!nft || !nft.tokenId) {
       return Response.json({ error: 'Meme not found' }, { status: 404 });
     }
 
-    // Get original IPFS image
+    // Obtener la mejor imagen disponible
     let image = '/images/placeholder.png';
-    if (nft.original_image_url) {
-      image = nft.original_image_url.replace('ipfs://', 'https://ipfs.io/ipfs/');
-    } else if (nft.image_url) {
-      image = nft.image_url;
+
+    if (nft.image?.cachedUrl) {
+      image = nft.image.cachedUrl;
+    } else if (nft.image?.pngUrl) {
+      image = nft.image.pngUrl;
+    } else if (nft.image?.originalUrl) {
+      const originalUrl = nft.image.originalUrl;
+      if (originalUrl.startsWith('ipfs://')) {
+        image = originalUrl.replace('ipfs://', 'https://cloudflare-ipfs.com/ipfs/');
+      } else {
+        image = originalUrl;
+      }
+    } else if (nft.raw?.metadata?.image) {
+      const rawImage = nft.raw.metadata.image;
+      if (rawImage.startsWith('ipfs://')) {
+        image = rawImage.replace('ipfs://', 'https://cloudflare-ipfs.com/ipfs/');
+      } else {
+        image = rawImage;
+      }
     }
 
     const meme = {
-      id: nft.identifier || nft.token_id || '0',
-      name: nft.name || 'Untitled',
+      id: nft.tokenId,
+      name: nft.name || nft.raw?.metadata?.name || 'Untitled',
       image,
-      description: nft.description || '',
-      opensea_url: `https://opensea.io/assets/${CHAIN}/${nft.contract}/${nft.identifier}`,
-      contract: nft.contract,
-      token_standard: nft.token_standard,
+      description: nft.description || nft.raw?.metadata?.description || '',
+      opensea_url: `https://opensea.io/assets/${CHAIN}/${MEMES_CONTRACT}/${nft.tokenId}`,
+      contract: MEMES_CONTRACT,
+      token_standard: nft.tokenType || 'ERC721',
     };
 
-    return Response.json({ meme });
+    return Response.json({ meme, source: 'alchemy' });
 
   } catch (error) {
     console.error('Error fetching meme:', error.message);

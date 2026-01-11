@@ -1,12 +1,112 @@
 @import "tailwindcss";
 
 :root {
+  /* === Design System: Spacing (always same) === */
+  --header-height-mobile: 44px;
+  --header-height-desktop: 64px;
+  --tab-bar-height: 56px;
+  --sidebar-width: 240px;
+  --trending-width: 320px;
+
+  /* === Design System: Typography === */
+  --font-sans: 'Geist', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono', monospace;
+}
+
+/* ============================================= */
+/* LIGHT THEME (Sketch/Comic sobre papel)       */
+/* ============================================= */
+:root,
+[data-theme="light"] {
+  /* === Paleta Principal === */
+  --color-paper: #f5e6d3;
+  --color-paper-dark: #e8d4b8;
+  --color-ink: #3e2723;
+  --color-ink-light: #5d4037;
+  --color-sketch-gray: #8b7d6b;
+  --color-accent: #d84315;
+  --color-gold: #ffb300;
+  --color-silver: #9e9e9e;
+  --color-bronze: #8d6e63;
+  --color-white: #ffffff;
+
+  /* === Mapeo a variables existentes === */
+  --background: var(--color-paper);
+  --foreground: var(--color-ink);
+  --accent: var(--color-accent);
+  --secondary: var(--color-ink-light);
+  --border: var(--color-ink);
+  --card: var(--color-white);
+
+  /* === Backgrounds === */
+  --bg-primary: var(--color-paper);
+  --bg-secondary: var(--color-paper-dark);
+  --bg-card: var(--color-white);
+  --bg-elevated: var(--color-paper-dark);
+
+  /* === Text === */
+  --text-primary: var(--color-ink);
+  --text-secondary: var(--color-ink-light);
+  --text-muted: var(--color-sketch-gray);
+
+  /* === Accent Colors === */
+  --accent-primary: var(--color-accent);
+  --accent-secondary: #e64a19;
+  --accent-gold: var(--color-gold);
+  --accent-green: #4caf50;
+  --accent-red: #d32f2f;
+  --accent-blue: #1976d2;
+
+  /* === Sketch specific === */
+  --border-sketch: var(--color-ink);
+  --border-sketch-width: 3px;
+  --shadow-sketch: 4px 4px 0px var(--color-ink);
+  --shadow-sketch-hover: 6px 6px 0px var(--color-ink);
+
+  /* === Header === */
+  --header-bg: var(--color-white);
+  --header-text: var(--color-ink);
+
+  /* === Fuentes Sketch === */
+  --font-heading-family: var(--font-heading), 'Permanent Marker', cursive;
+  --font-sketch-family: var(--font-sketch), 'Kalam', cursive;
+  --font-body-family: var(--font-body), 'Comic Neue', cursive;
+}
+
+/* ============================================= */
+/* DARK THEME */
+/* ============================================= */
+[data-theme="dark"] {
+  /* === Core Colors === */
   --background: #0a0a0a;
   --foreground: #ffffff;
   --accent: #00ff88;
   --secondary: #a0a0a0;
   --border: #2a2a2a;
   --card: #1a1a1a;
+
+  /* === Backgrounds === */
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #121212;
+  --bg-card: #1a1a1a;
+  --bg-elevated: #2a2a2a;
+
+  /* === Text === */
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --text-muted: #666666;
+
+  /* === Accent Colors === */
+  --accent-primary: #a5b4fc;
+  --accent-secondary: #818cf8;
+  --accent-gold: #fbbf24;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --accent-blue: #2081e2;
+
+  /* === Header specific === */
+  --header-bg: rgba(10, 10, 10, 0.7);
+  --header-text: #ffffff;
 }
 
 @theme inline {
@@ -31,9 +131,41 @@ body {
   min-height: 100vh;
 }
 
-/* Slightly lighter background on desktop */
+/* Light theme: Notebook paper background with lines */
+[data-theme="light"] body,
+:root:not([data-theme="dark"]) body {
+  background-color: var(--color-paper);
+  background-image:
+    /* Capa 1: Líneas horizontales de 2px cada 30px */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      var(--color-paper-dark) 2px,
+      var(--color-paper-dark) 4px
+    ),
+    /* Capa 2: Gradiente horizontal de izquierda a derecha */
+    linear-gradient(
+      90deg,
+      var(--color-paper) 0%,
+      var(--color-paper-dark) 100%
+    );
+  background-size: 100% 30px, 100% 100%;
+  font-family: var(--font-body-family);
+  color: var(--color-ink);
+}
+
+/* Dark theme: subtle white dots pattern */
+[data-theme="dark"] body {
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    var(--background);
+  background-size: 24px 24px, 100% 100%;
+}
+
+/* Slightly lighter background on desktop (dark theme only) */
 @media (min-width: 768px) {
-  :root {
+  [data-theme="dark"] {
     --background: #121212;
   }
 }
@@ -41,4 +173,383 @@ body {
 ::selection {
   background: var(--accent);
   color: var(--background);
+}
+
+/* Global interactive elements */
+button:not(:disabled),
+[role="button"],
+a[href],
+input[type="submit"],
+input[type="button"] {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* === Custom Scrollbar - Sin efectos hover === */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-elevated) transparent;
+}
+
+/* WebKit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-elevated);
+  border-radius: 4px;
+}
+
+/* Desactivar hover - mismo color siempre */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--bg-elevated);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--bg-elevated);
+}
+
+/* Esquina cuando hay scroll horizontal y vertical */
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ============================================= */
+/* SKETCH STYLE COMPONENTS (Light theme only)   */
+/* ============================================= */
+
+/* === Base Sketch Card === */
+[data-theme="light"] .sketch-card,
+:root:not([data-theme="dark"]) .sketch-card {
+  background: var(--color-white);
+  border: var(--border-sketch-width) solid var(--border-sketch);
+  border-radius: 5px 15px 10px 20px; /* Asimétrico */
+  box-shadow: var(--shadow-sketch);
+  transition: all 0.3s ease;
+}
+
+[data-theme="light"] .sketch-card:hover,
+:root:not([data-theme="dark"]) .sketch-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-sketch-hover);
+}
+
+/* === Sketch Card with rotation === */
+[data-theme="light"] .sketch-card-rotate,
+:root:not([data-theme="dark"]) .sketch-card-rotate {
+  transform: rotate(-1deg);
+}
+[data-theme="light"] .sketch-card-rotate:nth-child(2n),
+:root:not([data-theme="dark"]) .sketch-card-rotate:nth-child(2n) {
+  transform: rotate(1deg);
+}
+[data-theme="light"] .sketch-card-rotate:nth-child(3n),
+:root:not([data-theme="dark"]) .sketch-card-rotate:nth-child(3n) {
+  transform: rotate(2deg);
+}
+
+/* === Sketch Button - Gold (Primary CTA) === */
+[data-theme="light"] .sketch-btn-gold,
+:root:not([data-theme="dark"]) .sketch-btn-gold {
+  background: var(--color-gold);
+  color: var(--color-ink);
+  border: var(--border-sketch-width) solid var(--border-sketch);
+  border-radius: 5px 15px 10px 20px;
+  font-family: var(--font-sketch-family);
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 12px 28px;
+  box-shadow: var(--shadow-sketch);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+[data-theme="light"] .sketch-btn-gold:hover,
+:root:not([data-theme="dark"]) .sketch-btn-gold:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-sketch-hover);
+}
+
+/* === Sketch Button - Accent (Orange) === */
+[data-theme="light"] .sketch-btn-accent,
+:root:not([data-theme="dark"]) .sketch-btn-accent {
+  background: var(--color-accent);
+  color: var(--color-white);
+  border: var(--border-sketch-width) solid var(--border-sketch);
+  border-radius: 5px 15px 10px 20px;
+  font-family: var(--font-sketch-family);
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 12px 28px;
+  box-shadow: var(--shadow-sketch);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+/* === Sketch Button - Secondary (White/Outlined) === */
+[data-theme="light"] .sketch-btn-secondary,
+:root:not([data-theme="dark"]) .sketch-btn-secondary {
+  background: var(--color-white);
+  color: var(--color-ink);
+  border: var(--border-sketch-width) solid var(--border-sketch);
+  border-radius: 5px 15px 10px 20px;
+  font-family: var(--font-sketch-family);
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 12px 28px;
+  box-shadow: var(--shadow-sketch);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+[data-theme="light"] .sketch-btn-secondary:hover,
+:root:not([data-theme="dark"]) .sketch-btn-secondary:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-sketch-hover);
+}
+
+/* === Sketch Title (Permanent Marker) === */
+[data-theme="light"] .sketch-title,
+:root:not([data-theme="dark"]) .sketch-title {
+  font-family: var(--font-heading-family);
+  color: var(--color-ink);
+}
+
+/* === Sketch Subtitle (Kalam) === */
+[data-theme="light"] .sketch-subtitle,
+:root:not([data-theme="dark"]) .sketch-subtitle {
+  font-family: var(--font-sketch-family);
+  color: var(--color-ink);
+}
+
+/* === Sketch Body Text (Comic Neue) === */
+[data-theme="light"] .sketch-text,
+:root:not([data-theme="dark"]) .sketch-text {
+  font-family: var(--font-body-family);
+  color: var(--color-ink-light);
+}
+
+/* === Sketch Badge (Orange rotated) === */
+[data-theme="light"] .sketch-badge,
+:root:not([data-theme="dark"]) .sketch-badge {
+  display: inline-block;
+  background: var(--color-accent);
+  color: var(--color-white);
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-family: var(--font-sketch-family);
+  font-weight: 700;
+  font-size: 0.9rem;
+  transform: rotate(5deg);
+  border: 2px solid var(--border-sketch);
+}
+
+/* === Sketch Progress Container (Dashed border) === */
+[data-theme="light"] .sketch-progress,
+:root:not([data-theme="dark"]) .sketch-progress {
+  background: var(--color-paper);
+  border: 3px dashed var(--border-sketch);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+/* === Sketch Progress Bar (Striped animated) === */
+[data-theme="light"] .sketch-progress-bar,
+:root:not([data-theme="dark"]) .sketch-progress-bar {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--color-gold),
+    var(--color-gold) 10px,
+    #ffc107 10px,
+    #ffc107 20px
+  );
+  border-radius: 8px;
+  height: 20px;
+  background-size: 28px 28px;
+  animation: progress-stripes 1s linear infinite;
+}
+
+/* === Sketch Number (Big accent numbers) === */
+[data-theme="light"] .sketch-number,
+:root:not([data-theme="dark"]) .sketch-number {
+  font-family: var(--font-heading-family);
+  font-size: 3rem;
+  color: var(--color-accent);
+}
+
+/* === Sketch Nav Link === */
+[data-theme="light"] .sketch-nav-link,
+:root:not([data-theme="dark"]) .sketch-nav-link {
+  font-family: var(--font-sketch-family);
+  color: var(--color-ink);
+  text-decoration: none;
+  position: relative;
+}
+
+[data-theme="light"] .sketch-nav-link::after,
+:root:not([data-theme="dark"]) .sketch-nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--color-accent);
+  transition: width 0.3s ease;
+}
+
+[data-theme="light"] .sketch-nav-link:hover::after,
+:root:not([data-theme="dark"]) .sketch-nav-link:hover::after {
+  width: 100%;
+}
+
+/* === Podium Colors === */
+[data-theme="light"] .sketch-gold,
+:root:not([data-theme="dark"]) .sketch-gold {
+  background: linear-gradient(135deg, #ffb300 0%, #ffd54f 100%);
+}
+
+[data-theme="light"] .sketch-silver,
+:root:not([data-theme="dark"]) .sketch-silver {
+  background: linear-gradient(135deg, #9e9e9e 0%, #e0e0e0 100%);
+}
+
+[data-theme="light"] .sketch-bronze,
+:root:not([data-theme="dark"]) .sketch-bronze {
+  background: linear-gradient(135deg, #8d6e63 0%, #bcaaa4 100%);
+}
+
+/* === Mining Animations === */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.5s ease-out;
+}
+
+/* Float up animation for mining points */
+@keyframes float-up {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-30px) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-60px) scale(0.8);
+  }
+}
+
+.animate-float-up {
+  animation: float-up 2s ease-out forwards;
+}
+
+/* Progress stripes animation (for sketch-progress-bar) */
+@keyframes progress-stripes {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 28px 0;
+  }
+}
+
+/* Float animation (for mascot or floating elements) */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Sketch-move animation (subtle opacity pulsing) */
+@keyframes sketch-move {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.animate-sketch-move {
+  animation: sketch-move 3s ease-in-out infinite;
+}
+
+/* Wiggle animation for playful elements */
+@keyframes wiggle {
+  0%, 100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+
+.animate-wiggle {
+  animation: wiggle 2s ease-in-out infinite;
+}
+
+/* Pulse glow for highlights */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: var(--shadow-sketch);
+  }
+  50% {
+    box-shadow: var(--shadow-sketch-hover), 0 0 20px var(--color-gold);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* RainbowKit modal z-index fix */
+[data-rk] {
+  z-index: 9999 !important;
 }

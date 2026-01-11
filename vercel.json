@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/meme-monday",
+      "schedule": "0 23 * * 0"
+    },
+    {
+      "path": "/api/cron/seasons",
+      "schedule": "5 0 * * *"
+    }
+  ]
+}

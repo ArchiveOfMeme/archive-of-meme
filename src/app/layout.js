@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Permanent_Marker, Kalam, Comic_Neue } from "next/font/google";
 import "./globals.css";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import UpdateBanner from "@/components/UpdateBanner";
@@ -11,6 +11,25 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+// Sketch-style fonts for the archive aesthetic
+const permanentMarker = Permanent_Marker({
+  weight: "400",
+  variable: "--font-heading",
+  subsets: ["latin"],
+});
+
+const kalam = Kalam({
+  weight: ["300", "400", "700"],
+  variable: "--font-sketch",
+  subsets: ["latin"],
+});
+
+const comicNeue = Comic_Neue({
+  weight: ["300", "400", "700"],
+  variable: "--font-body",
   subsets: ["latin"],
 });
 
@@ -70,7 +89,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0a0a0a]`}
+        className={`${geistSans.variable} ${geistMono.variable} ${permanentMarker.variable} ${kalam.variable} ${comicNeue.variable} antialiased`}
       >
         <Providers>
           <ServiceWorkerRegister />

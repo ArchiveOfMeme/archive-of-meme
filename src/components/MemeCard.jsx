@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function MemeCard({ meme }) {
   const [expanded, setExpanded] = useState(false);
@@ -44,11 +45,17 @@ export default function MemeCard({ meme }) {
         </div>
 
         {/* Image */}
-        <div className="w-full flex justify-center">
-          <img
+        <div className="w-full">
+          <Image
             src={meme.image}
             alt={meme.name}
-            className="w-full h-auto max-h-[70vh] object-contain"
+            width={600}
+            height={600}
+            sizes="(max-width: 768px) 100vw, 600px"
+            className="w-full h-auto"
+            placeholder="blur"
+            blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWExYTFhIi8+PC9zdmc+"
+            loading="lazy"
           />
         </div>
       </Link>

@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount, useDisconnect, useBalance } from 'wagmi';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
+import { useTheme } from '@/hooks/useTheme';
 import InstallModal from './InstallModal';
 
 export default function Header() {
@@ -13,6 +15,31 @@ export default function Header() {
   const [showModal, setShowModal] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const { isInstallable, isIOS, install } = usePWAInstall();
+  const { isConnected, address } = useAccount();
+  const { disconnect } = useDisconnect();
+  const { data: balance } = useBalance({ address });
+  const [showWalletMenu, setShowWalletMenu] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+
+  const copyAddress = () => {
+    if (address) {
+      navigator.clipboard.writeText(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  // Generate gradient colors from address for avatar
+  const getAvatarGradient = (addr) => {
+    if (!addr) return ['#a5b4fc', '#818cf8'];
+    const hash = addr.slice(2, 10);
+    const hue1 = parseInt(hash.slice(0, 4), 16) % 360;
+    const hue2 = (hue1 + 40) % 360;
+    return [`hsl(${hue1}, 70%, 60%)`, `hsl(${hue2}, 70%, 50%)`];
+  };
+
+  const avatarColors = getAvatarGradient(address);
 
   useEffect(() => {
     // Check if desktop (768px+)
@@ -59,13 +86,14 @@ export default function Header() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/70 backdrop-blur-md transition-transform duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-transform duration-300 ${
           visible ? 'translate-y-0' : '-translate-y-full'
         }`}
+        style={{ backgroundColor: 'var(--header-bg)' }}
       >
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between h-14">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2 flex-shrink-0">
               <Image
                 src="/images/logo/Logo.png"
                 alt="Arch - Archive of Meme mascot"
@@ -74,49 +102,199 @@ export default function Header() {
                 className="rounded"
               />
               <span
-                className="text-base tracking-wider uppercase text-[#a5b4fc] hover:text-white transition-colors duration-300"
-                style={{ fontFamily: 'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif' }}
+                className="text-base tracking-wider uppercase transition-colors duration-300 hidden sm:inline"
+                style={{
+                  fontFamily: 'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif',
+                  color: 'var(--accent-primary)',
+                }}
               >
                 ARCHIVE OF MEME
               </span>
             </Link>
 
-            <nav className="flex items-center gap-2">
-              <ConnectButton.Custom>
-                {({ account, chain, openConnectModal, openAccountModal, mounted }) => {
-                  const connected = mounted && account && chain;
-                  return (
-                    <button
-                      onClick={connected ? openAccountModal : openConnectModal}
-                      className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#a5b4fc] text-black hover:bg-[#8b9cf0] rounded-full transition-all duration-200"
+            <nav className="flex items-center gap-2 flex-shrink-0">
+              {isConnected ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowWalletMenu(!showWalletMenu)}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-full transition-all duration-200"
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      borderWidth: '1px',
+                      borderColor: 'var(--border)',
+                    }}
+                  >
+                    {/* Avatar */}
+                    <div
+                      className="w-6 h-6 rounded-full"
+                      style={{
+                        background: `linear-gradient(135deg, ${avatarColors[0]}, ${avatarColors[1]})`,
+                      }}
+                    />
+                    <span className="text-xs font-medium hidden sm:inline" style={{ color: 'var(--text-primary)' }}>
+                      {address?.slice(0, 6)}...{address?.slice(-4)}
+                    </span>
+                    <svg
+                      className={`w-3 h-3 transition-transform ${showWalletMenu ? 'rotate-180' : ''}`}
+                      style={{ color: 'var(--text-muted)' }}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
-                      {connected ? (
-                        <>
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                          </svg>
-                          <span className="hidden sm:inline">{account.displayName}</span>
-                        </>
-                      ) : (
-                        'Connect'
-                      )}
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {/* Wallet Menu Dropdown */}
+                  {showWalletMenu && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setShowWalletMenu(false)}
+                      />
+                      <div
+                        className="absolute right-0 mt-2 w-64 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                        style={{
+                          backgroundColor: 'var(--bg-card)',
+                          borderWidth: '1px',
+                          borderColor: 'var(--border)',
+                        }}
+                      >
+                        {/* Header with avatar */}
+                        <div className="p-4" style={{ borderBottom: '1px solid var(--border)' }}>
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="w-10 h-10 rounded-full"
+                              style={{
+                                background: `linear-gradient(135deg, ${avatarColors[0]}, ${avatarColors[1]})`,
+                              }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                                {address?.slice(0, 6)}...{address?.slice(-4)}
+                              </p>
+                              {balance && (
+                                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                                  {parseFloat(balance.formatted).toFixed(4)} {balance.symbol}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="p-2">
+                          {/* Copy Address */}
+                          <button
+                            onClick={copyAddress}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-xl transition-colors"
+                            style={{ color: 'var(--text-secondary)' }}
+                          >
+                            {copied ? (
+                              <svg className="w-4 h-4" style={{ color: 'var(--accent-green)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            ) : (
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                              </svg>
+                            )}
+                            <span>{copied ? 'Copied!' : 'Copy Address'}</span>
+                          </button>
+
+                          {/* View on Explorer */}
+                          <a
+                            href={`https://basescan.org/address/${address}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-xl transition-colors"
+                            style={{ color: 'var(--text-secondary)' }}
+                            onClick={() => setShowWalletMenu(false)}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                            <span>View on Explorer</span>
+                          </a>
+
+                          {/* Divider */}
+                          <div className="my-2" style={{ borderTop: '1px solid var(--border)' }} />
+
+                          {/* Disconnect */}
+                          <button
+                            onClick={() => {
+                              disconnect();
+                              setShowWalletMenu(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-xl transition-colors"
+                            style={{ color: 'var(--accent-red)' }}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            <span>Disconnect</span>
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <ConnectButton.Custom>
+                  {({ openConnectModal }) => (
+                    <button
+                      onClick={openConnectModal}
+                      className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200"
+                      style={{
+                        backgroundColor: 'var(--accent-primary)',
+                        color: theme === 'dark' ? 'black' : 'white',
+                      }}
+                    >
+                      Connect
                     </button>
-                  );
-                }}
-              </ConnectButton.Custom>
+                  )}
+                </ConnectButton.Custom>
+              )}
               {isInstallable && (
                 <button
                   onClick={handleInstallClick}
-                  className="px-3 py-1.5 text-xs font-medium text-[#a5b4fc] border border-[#a5b4fc]/30 hover:border-[#a5b4fc] hover:bg-[#a5b4fc]/10 rounded-full transition-all duration-200"
+                  className="px-3 py-1.5 text-xs font-medium border rounded-full transition-all duration-200"
+                  style={{
+                    color: 'var(--accent-primary)',
+                    borderColor: 'color-mix(in srgb, var(--accent-primary) 30%, transparent)',
+                  }}
                 >
                   Install
                 </button>
               )}
+              {/* Theme Toggle Button */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-full transition-all duration-200 hover:scale-110"
+                style={{
+                  backgroundColor: 'var(--bg-elevated)',
+                  color: 'var(--text-primary)',
+                }}
+                aria-label={theme === 'light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}
+              >
+                {theme === 'light' ? (
+                  // Moon icon for light mode (click to go dark)
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                ) : (
+                  // Sun icon for dark mode (click to go light)
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                )}
+              </button>
               <a
                 href="https://opensea.io/collection/archive-of-meme-arch"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#a0a0a0] hover:text-white transition-colors duration-200"
+                className="transition-colors duration-200"
+                style={{ color: 'var(--text-secondary)' }}
                 aria-label="OpenSea"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">

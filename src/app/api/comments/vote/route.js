@@ -16,14 +16,13 @@ export async function POST(request) {
       return Response.json({ error: 'commentId, wallet, and voteType (1 or -1) required' }, { status: 400 });
     }
 
-    // Verify user has the Community Pass
-    const passResponse = await fetch(
-      `http://localhost:3000/api/verify-pass?wallet=${wallet}`
-    );
+    // Verify user has the OG Pass
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const passResponse = await fetch(`${baseUrl}/api/verify-pass?wallet=${wallet}`);
     const passData = await passResponse.json();
 
     if (!passData.hasPass) {
-      return Response.json({ error: 'Community Pass required to vote' }, { status: 403 });
+      return Response.json({ error: 'OG Pass required to vote' }, { status: 403 });
     }
 
     // Check if user already voted

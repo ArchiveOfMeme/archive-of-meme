@@ -3,6 +3,16 @@
 import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 
+// Level icons mapping
+const LEVEL_ICONS = {
+  bronze: '🥉',
+  silver: '🥈',
+  gold: '🥇',
+  platinum: '💎',
+  diamond: '💠',
+  legend: '👑'
+};
+
 export default function Comment({ comment, onVote, onReply, canInteract, currentWallet }) {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyContent, setReplyContent] = useState('');
@@ -24,11 +34,26 @@ export default function Comment({ comment, onVote, onReply, canInteract, current
     setShowReplyForm(false);
   };
 
+  const levelIcon = comment.author.level ? LEVEL_ICONS[comment.author.level] : null;
+  const badges = comment.author.badges || [];
+
   return (
     <div className="border-l-2 border-[#2a2a2a] pl-3 py-2">
       {/* Header */}
-      <div className="flex items-center gap-2 text-xs text-[#666]">
+      <div className="flex items-center gap-2 text-xs text-[#666] flex-wrap">
         <span className="text-[#a5b4fc] font-medium">{comment.author.displayName}</span>
+        {/* Level icon */}
+        {levelIcon && (
+          <span className="text-sm" title={`${comment.author.level} level`}>{levelIcon}</span>
+        )}
+        {/* Badges (max 3) */}
+        {badges.length > 0 && (
+          <span className="flex items-center gap-0.5">
+            {badges.map((badge) => (
+              <span key={badge.id} className="text-sm" title={badge.name}>{badge.icon}</span>
+            ))}
+          </span>
+        )}
         <span>•</span>
         <span>{timeAgo}</span>
       </div>
